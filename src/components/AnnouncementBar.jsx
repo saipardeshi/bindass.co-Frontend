@@ -2,9 +2,9 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const MESSAGES = [
-  '🖤 FREE SHIPPING ABOVE ₹1299 — USE CODE: BINDASS10',
-  '⚡ NEW DROP: OVERSIZED HOODIES — LIMITED UNITS',
-  '🔥 MEMBER EXCLUSIVE: EARLY ACCESS TO NEXT DROP',
+  ' FREE SHIPPING ABOVE ₹1299 — USE CODE: BINDASS10',
+  ' NEW DROP: OVERSIZED HOODIES — LIMITED UNITS',
+  ' MEMBER EXCLUSIVE: EARLY ACCESS TO NEXT DROP',
 ]
 
 export default function AnnouncementBar() {
