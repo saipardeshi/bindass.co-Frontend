@@ -62,9 +62,13 @@ export default function Navbar() {
       >
         <div className="max-w-screen-xl mx-auto px-5 md:px-10 h-16 flex items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="font-display text-2xl tracking-wider text-white hover:text-accent transition-colors duration-300">
-            BINDASS
-          </Link>
+          <Link to="/" className="flex items-center hover:opacity-80 transition-opacity duration-300">
+  <img
+    src="bindass.co.logo.bg.png"
+    alt="BINDASS"
+    className="h-10 w-auto object-contain"
+  />
+</Link>
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-10">

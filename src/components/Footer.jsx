@@ -35,9 +35,13 @@ export default function Footer() {
       <div className="max-w-screen-xl mx-auto px-6 md:px-10 py-20 grid grid-cols-2 md:grid-cols-5 gap-10">
         {/* Brand column */}
         <div className="col-span-2">
-          <Link to="/" className="font-display text-4xl tracking-wider text-white hover:text-accent transition-colors inline-block mb-4">
-            BINDASS
-          </Link>
+          <Link to="/" className="inline-block mb-4 hover:opacity-80 transition-opacity duration-300">
+  <img
+    src="bindass.co.logo.bg.png"
+    alt="BINDASS"
+    className="h-20 w-auto object-contain"
+  />
+</Link>
           <p className="font-sans text-sm text-gray-500 leading-relaxed max-w-xs mb-8">
             Precision-tailored pieces that break convention and redefine presence.
             This isn't just fashion — it's a statement.
@@ -96,7 +100,7 @@ export default function Footer() {
             </Link>
           </div>
           <p className="font-mono text-[10px] text-gray-800 tracking-wider uppercase">
-            Crafted in India 🖤
+            Crafted in India 
           </p>
         </div>
       </div>
