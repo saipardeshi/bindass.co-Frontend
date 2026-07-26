@@ -1,16 +1,15 @@
-# React + Vite
+# BINDASS.co — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Storefront for BINDASS, a premium unisex hoodie D2C brand. React SPA consuming the BINDASS backend API.
 
-Currently, two official plugins are available:
+## Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **React 19** + **Vite**
+- **Tailwind CSS** — utility-first styling
+- **React Router v7** — client-side routing
+- **TanStack Query (React Query)** — server-state caching for products/orders
+- **Axios** — API client, with a response interceptor that clears the session on 401
+- **Framer Motion** — page/element transitions
+- **React Hot Toast** — notifications
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Architecture
