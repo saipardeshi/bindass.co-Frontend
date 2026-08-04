@@ -220,28 +220,7 @@ function FeaturedSection({ products, loading }) {
   )
 }
 
-/* ─── Marquee Strip ─── */
-function MarqueeStrip() {
-  const text = ['STYLE', 'VIBE', 'REFLECT', 'UNISEX', 'OVERSIZED', 'BINDASS', 'DARK', 'LUXURY']
-  const repeated = [...text, ...text]
 
-  return (
-    <div className="border-y border-white/5 py-4 overflow-hidden bg-gray-950">
-      <motion.div
-        animate={{ x: ['0%', '-50%'] }}
-        transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}
-        className="flex gap-10 whitespace-nowrap"
-      >
-        {repeated.map((t, i) => (
-          <span key={i} className="font-display text-2xl tracking-widest text-gray-800 hover:text-gray-600 transition-colors cursor-default">
-            {t}
-            <span className="text-accent mx-5">✦</span>
-          </span>
-        ))}
-      </motion.div>
-    </div>
-  )
-}
 
 /* ─── New Arrivals ─── */
 function NewArrivalsSection({ products, loading }) {
@@ -272,7 +251,7 @@ function MissionVisionSection() {
       <div className="grid md:grid-cols-2 min-h-[500px]">
         <div className="relative overflow-hidden bg-gray-900">
           <img
-            src={heroUrl('samples/people/smiling-man')}
+            src={heroUrl('09c14caaec87319b9505427d1fa1ae53_snesau')}
             alt="Our Mission"
             className="w-full h-full object-cover opacity-70 hover:opacity-90 transition-opacity duration-700"
           />
@@ -318,7 +297,7 @@ function MissionVisionSection() {
         </motion.div>
         <div className="relative overflow-hidden bg-gray-800 order-1 md:order-2">
           <img
-            src={heroUrl('samples/people/jazz')}
+            src={heroUrl('04fa1b239c87c925221839f4fdd14fbe_jpc0xg')}
             alt="Our Vision"
             className="w-full h-full object-cover opacity-70 hover:opacity-90 transition-opacity duration-700"
           />
@@ -403,7 +382,6 @@ export default function HomePage() {
       <HeroSection />
       <DisruptBanner />
       <FeaturedSection products={featured?.products} loading={fl} />
-      <MarqueeStrip />
       <NewArrivalsSection products={newArrivals?.products} loading={nl} />
       <MissionVisionSection />
       <BestSellersSection products={bestSellers?.products} loading={bl} />
