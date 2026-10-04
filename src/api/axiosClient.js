@@ -6,6 +6,18 @@ const axiosClient = axios.create({
   headers: { 'Content-Type': 'application/json' },
 })
 
+// Request interceptor for attaching token
+axiosClient.interceptors.request.use(
+  config => {
+    const token = localStorage.getItem('bindass_token')
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+    return config
+  },
+  error => Promise.reject(error)
+)
+
 // Response interceptor for error handling
 axiosClient.interceptors.response.use(
   res => res,
