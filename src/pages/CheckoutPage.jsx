@@ -55,16 +55,17 @@ export default function CheckoutPage() {
       })
 
       // 2. Open Razorpay
+      const resultData = data.data; // ApiResponse's data field
       const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-        amount: data.order.amount,
+        amount: Math.round(resultData.order.totalAmount * 100), // convert to paise
         currency: 'INR',
         name: 'BINDASS',
         description: 'Premium Unisex Hoodies',
-        order_id: data.razorpayOrderId,
+        order_id: resultData.razorpayOrderId,
         handler: async (response) => {
           await verifyPayment({
-            orderId: data.order._id,
+            orderId: resultData.order.id || resultData.order._id,
             razorpayPaymentId: response.razorpay_payment_id,
             razorpayOrderId: response.razorpay_order_id,
             razorpaySignature: response.razorpay_signature,
