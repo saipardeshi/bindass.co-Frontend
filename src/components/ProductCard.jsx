@@ -39,15 +39,17 @@ export default function ProductCard({ product, index = 0 }) {
             src={cardUrl(primaryImg)}
             alt={product.name}
             loading="lazy"
+            decoding="async"
             className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ${
               hovered ? 'opacity-0 scale-105' : 'opacity-100 scale-100'
             }`}
           />
-          {/* Hover image */}
+          {/* Hover image — only fetch once the card is hovered */}
           <img
-            src={cardUrl(hoverImg)}
+            src={hovered ? cardUrl(hoverImg) : undefined}
             alt={product.name}
             loading="lazy"
+            decoding="async"
             className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ${
               hovered ? 'opacity-100 scale-100' : 'opacity-0 scale-110'
             }`}

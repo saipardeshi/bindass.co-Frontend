@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useProduct } from '../hooks/useProducts'
 import { useCart } from '../context/CartContext'
 import { formatINR } from '../utils/formatCurrency'
-import { cardUrl, heroUrl } from '../utils/cloudinaryHelpers'
+import { cardUrl, sectionUrl } from '../utils/cloudinaryHelpers'
 import { ProductCardSkeleton } from '../components/SkeletonLoader'
 import toast from 'react-hot-toast'
 
@@ -96,7 +96,7 @@ export default function ProductPage() {
                   activeImg === i ? 'border-white/50' : 'border-transparent opacity-50 hover:opacity-80'
                 }`}
               >
-                <img src={cardUrl(img)} alt="" className="w-full h-full object-cover" />
+                <img src={cardUrl(img)} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover" />
               </button>
             ))}
           </div>
@@ -107,7 +107,7 @@ export default function ProductPage() {
               <AnimatePresence mode="wait">
                 <motion.img
                   key={activeImg}
-                  src={heroUrl(product.images[activeImg])}
+                  src={sectionUrl(product.images[activeImg])}
                   alt={product.name}
                   initial={{ opacity: 0, scale: 1.04 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -142,7 +142,7 @@ export default function ProductPage() {
                     activeImg === i ? 'border-white/50' : 'border-transparent opacity-50'
                   }`}
                 >
-                  <img src={cardUrl(img)} alt="" className="w-full h-full object-cover" />
+                  <img src={cardUrl(img)} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover" />
                 </button>
               ))}
             </div>
@@ -257,7 +257,7 @@ export default function ProductPage() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3 }}
- b             >
+              >
                 {activeTab === 'details' && (
                   <ul className="space-y-2">
                     {product.details.map((d, i) => (

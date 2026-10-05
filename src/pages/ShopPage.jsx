@@ -130,6 +130,11 @@ const rawProducts = data?.products || ALL_IMAGES.map((img, i) => ({
 }))
 const [visibleCount, setVisibleCount] = useState(12)
 
+// Reset visible count when filters change
+useEffect(() => {
+  setVisibleCount(12)
+}, [filters, searchQuery])
+
 const filteredProducts = (() => {
   let p = [...rawProducts]
   if (searchQuery) p = p.filter(x => x.name.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -190,7 +195,7 @@ const hasMore  = visibleCount < filteredProducts.length
 
           <div className="flex items-center gap-4">
             <span className="font-mono text-[10px] text-gray-600 tracking-wider uppercase">
-              {products.length} items
+              {filteredProducts.length} items
             </span>
             {/* Sort */}
             <select

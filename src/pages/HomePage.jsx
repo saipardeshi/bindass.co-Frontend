@@ -5,7 +5,7 @@ import { useFeatured, useNewArrivals, useBestSellers } from '../hooks/useProduct
 import ProductCard from '../components/ProductCard'
 import Newsletter from '../components/Newsletter'
 import { ProductCardSkeleton } from '../components/SkeletonLoader'
-import { heroUrl } from '../utils/cloudinaryHelpers'
+import { heroUrl, sectionUrl } from '../utils/cloudinaryHelpers'
 
 /* ─── Dummy data (remove when API is live) ─── */
 const DUMMY_PRODUCTS = Array.from({ length: 8 }, (_, i) => ({
@@ -67,6 +67,9 @@ function HeroSection() {
         <img
           src={heroUrl(SLIDES[0].image)}
           alt="Bindass hero"
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
           className="w-full h-full object-cover object-top opacity-60"
         />
         {/* Gradient vignette */}
@@ -251,8 +254,10 @@ function MissionVisionSection() {
       <div className="grid md:grid-cols-2 min-h-[500px]">
         <div className="relative overflow-hidden bg-gray-900">
           <img
-            src={heroUrl('09c14caaec87319b9505427d1fa1ae53_snesau')}
+            src={sectionUrl('09c14caaec87319b9505427d1fa1ae53_snesau')}
             alt="Our Mission"
+            loading="lazy"
+            decoding="async"
             className="w-full h-full object-cover opacity-70 hover:opacity-90 transition-opacity duration-700"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent" />
@@ -297,8 +302,10 @@ function MissionVisionSection() {
         </motion.div>
         <div className="relative overflow-hidden bg-gray-800 order-1 md:order-2">
           <img
-            src={heroUrl('04fa1b239c87c925221839f4fdd14fbe_jpc0xg')}
+            src={sectionUrl('04fa1b239c87c925221839f4fdd14fbe_jpc0xg')}
             alt="Our Vision"
+            loading="lazy"
+            decoding="async"
             className="w-full h-full object-cover opacity-70 hover:opacity-90 transition-opacity duration-700"
           />
           <div className="absolute inset-0 bg-gradient-to-l from-black/60 to-transparent" />

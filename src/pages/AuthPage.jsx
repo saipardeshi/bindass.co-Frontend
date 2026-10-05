@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
+import { sectionUrl } from '../utils/cloudinaryHelpers'
 import toast from 'react-hot-toast'
 
 export default function AuthPage() {
@@ -37,8 +38,10 @@ export default function AuthPage() {
       {/* Left — decorative */}
       <div className="hidden md:block relative overflow-hidden bg-gray-950">
         <img
-          src="https://res.cloudinary.com/drxjzujjo/image/upload/b784be56a2cd854742fd4955dd8312bd_lhbpmv"
+          src={sectionUrl('b784be56a2cd854742fd4955dd8312bd_lhbpmv')}
           alt=""
+          loading="lazy"
+          decoding="async"
           className="w-full h-full object-cover opacity-40"
         />
         <div className="absolute inset-0 flex flex-col justify-end p-16">
