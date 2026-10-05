@@ -135,9 +135,9 @@ export default function CartPage() {
                   {shipping === 0 ? 'FREE' : formatINR(shipping)}
                 </span>
               </div>
-              {shipping > 0 && (
+              {shipping > 0 && cartTotal < 1299 && (
                 <p className="font-mono text-[9px] text-gray-600 tracking-wider uppercase">
-                  Add {formatINR(1299 - cartTotal)} more for free shipping
+                  Add {formatINR(Math.max(0, 1299 - cartTotal))} more for free shipping
                 </p>
               )}
               <div className="border-t border-white/5 pt-4 flex justify-between">

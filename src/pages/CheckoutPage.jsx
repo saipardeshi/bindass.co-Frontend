@@ -49,7 +49,7 @@ export default function CheckoutPage() {
     try {
       // 1. Create order on backend
       const { data } = await createOrder({
-        items: items.map(i => ({ product: i._id, size: i.size, quantity: i.quantity })),
+        items: items.map(i => ({ productId: i._id, size: i.size, quantity: i.quantity })),
         shippingAddress: address,
         totalAmount: total,
       })
@@ -81,7 +81,9 @@ export default function CheckoutPage() {
       const rzp = new window.Razorpay(options)
       rzp.open()
     } catch (err) {
-      toast.error('Payment failed. Please try again.')
+      console.error('Payment error:', err)
+      const msg = err?.response?.data?.message || err?.message || 'Payment failed. Please try again.'
+      toast.error(msg)
     } finally {
       setLoading(false)
     }
@@ -144,7 +146,18 @@ export default function CheckoutPage() {
                 </div>
               ))}
             </div>
-            <button onClick={() => setStep(1)} className="btn-primary mt-8 px-12">
+            <button
+              onClick={() => {
+                const required = ['name', 'phone', 'line1', 'city', 'state', 'pincode']
+                const missing = required.filter(k => !address[k].trim())
+                if (missing.length > 0) {
+                  toast.error('Please fill in all required fields')
+                  return
+                }
+                setStep(1)
+              }}
+              className="btn-primary mt-8 px-12"
+            >
               Continue to Review
             </button>
           </motion.div>

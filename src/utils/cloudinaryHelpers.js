@@ -26,6 +26,7 @@ export const getImageUrl = (publicId, options = {}) => {
 }
 
 // Preset helpers
-export const thumbUrl = (id) => getImageUrl(id, { width: 600, height: 700, crop: 'fill' })
-export const heroUrl  = (id) => getImageUrl(id, { width: 1400, quality: 85 })
-export const cardUrl  = (id) => getImageUrl(id, { width: 800, height: 900, crop: 'fill' })
+export const thumbUrl   = (id) => getImageUrl(id, { width: 400, height: 480, crop: 'fill' })
+export const heroUrl    = (id) => getImageUrl(id, { width: 1200, quality: 80 })
+export const sectionUrl = (id) => getImageUrl(id, { width: 900, height: 600, quality: 80, crop: 'fill' })
+export const cardUrl    = (id) => getImageUrl(id, { width: 600, height: 700, crop: 'fill' })
