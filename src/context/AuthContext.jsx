@@ -9,18 +9,20 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const token = localStorage.getItem('bindass_token')
-    if (token) {
+    if (token && token !== 'undefined' && token !== 'null') {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
       fetchUser()
     } else {
+      localStorage.removeItem('bindass_token')
       setLoading(false)
     }
   }, [])
 
   const fetchUser = async () => {
     try {
-      const { data } = await axios.get('/api/auth/me')
-      setUser(data.user)
+      const res = await axios.get('/api/auth/me')
+      const userData = res.data?.data || res.data?.user || res.data
+      setUser(userData)
     } catch {
       logout()
     } finally {
@@ -29,19 +31,29 @@ export function AuthProvider({ children }) {
   }
 
   const login = async (email, password) => {
-    const { data } = await axios.post('/api/auth/login', { email, password })
-    localStorage.setItem('bindass_token', data.token)
-    axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`
-    setUser(data.user)
-    return data
+    const res = await axios.post('/api/auth/login', { email, password })
+    const payload = res.data?.data || res.data
+    const token = payload?.token
+    const userData = payload?.user || payload
+    if (token) {
+      localStorage.setItem('bindass_token', token)
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+    }
+    setUser(userData)
+    return res.data
   }
 
   const register = async (name, email, password) => {
-    const { data } = await axios.post('/api/auth/register', { name, email, password })
-    localStorage.setItem('bindass_token', data.token)
-    axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`
-    setUser(data.user)
-    return data
+    const res = await axios.post('/api/auth/register', { name, email, password })
+    const payload = res.data?.data || res.data
+    const token = payload?.token
+    const userData = payload?.user || payload
+    if (token) {
+      localStorage.setItem('bindass_token', token)
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+    }
+    setUser(userData)
+    return res.data
   }
 
   const logout = () => {

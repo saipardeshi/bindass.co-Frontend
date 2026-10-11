@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useCart } from '../context/CartContext'
+import { useAuth } from '../context/AuthContext'
 import { formatINR } from '../utils/formatCurrency'
 import { createOrder, verifyPayment } from '../api/orders'
 import toast from 'react-hot-toast'
@@ -12,19 +13,26 @@ export default function CheckoutPage() {
   const [step, setStep] = useState(0)
   const [loading, setLoading] = useState(false)
   const { items, cartTotal, clearCart } = useCart()
+  const { user, loading: authLoading } = useAuth()
   const navigate = useNavigate()
 
   const shipping = cartTotal >= 1299 ? 0 : 99
   const total = cartTotal + shipping
 
   useEffect(() => {
+    if (!authLoading && !user) {
+      toast.error('Please sign in to complete checkout')
+      navigate('/auth?redirect=/checkout')
+      return
+    }
+
     // Redirect if cart is empty
     if (items.length === 0) {
       navigate('/cart')
       return
     }
 
-    // Load Razorpay script dynamically
+    // Preload Razorpay script dynamically
     const scriptId = 'razorpay-checkout-script'
     let script = document.getElementById(scriptId)
     if (!script) {
@@ -34,17 +42,57 @@ export default function CheckoutPage() {
       script.async = true
       document.body.appendChild(script)
     }
-  }, [items, navigate])
+  }, [user, authLoading, items, navigate])
 
   const [address, setAddress] = useState({
-    name: '', phone: '', line1: '', line2: '',
+    name: user?.name || '', phone: '', line1: '', line2: '',
     city: '', state: '', pincode: '', country: 'India',
   })
+
+  useEffect(() => {
+    if (user?.name && !address.name) {
+      setAddress(p => ({ ...p, name: user.name }))
+    }
+  }, [user])
 
   const handleChange = e =>
     setAddress(p => ({ ...p, [e.target.name]: e.target.value }))
 
+  const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+      if (window.Razorpay) {
+        resolve(true)
+        return
+      }
+      const scriptId = 'razorpay-checkout-script'
+      let script = document.getElementById(scriptId)
+      if (!script) {
+        script = document.createElement('script')
+        script.id = scriptId
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js'
+        script.async = true
+        script.onload = () => resolve(true)
+        script.onerror = () => resolve(false)
+        document.body.appendChild(script)
+      } else {
+        script.onload = () => resolve(true)
+      }
+    })
+  }
+
   const handlePayment = async () => {
+    const isScriptLoaded = await loadRazorpayScript()
+    if (!isScriptLoaded || !window.Razorpay) {
+      toast.error('Failed to load Razorpay gateway. Please check your internet connection.')
+      return
+    }
+
+    const razorpayKey = (import.meta.env.VITE_RAZORPAY_KEY_ID || '').trim()
+    if (!razorpayKey) {
+      toast.error('Razorpay key is not configured.')
+      return
+    }
+
     setLoading(true)
     try {
       // 1. Create order on backend
@@ -57,34 +105,56 @@ export default function CheckoutPage() {
       // 2. Open Razorpay
       const resultData = data.data; // ApiResponse's data field
       const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        key: razorpayKey,
         amount: Math.round(resultData.order.totalAmount * 100), // convert to paise
         currency: 'INR',
         name: 'BINDASS',
         description: 'Premium Unisex Hoodies',
         order_id: resultData.razorpayOrderId,
         handler: async (response) => {
-          await verifyPayment({
-            orderId: resultData.order.id || resultData.order._id,
-            razorpayPaymentId: response.razorpay_payment_id,
-            razorpayOrderId: response.razorpay_order_id,
-            razorpaySignature: response.razorpay_signature,
-          })
-          clearCart()
-          toast.success('Order placed successfully!')
-          navigate(`/orders`)
+          setLoading(true)
+          try {
+            await verifyPayment({
+              orderId: resultData.order.id || resultData.order._id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpayOrderId: response.razorpay_order_id,
+              razorpaySignature: response.razorpay_signature,
+            })
+            clearCart()
+            toast.success('Order placed successfully!')
+            navigate('/orders')
+          } catch (verifyErr) {
+            console.error('Payment verification error:', verifyErr)
+            toast.error(verifyErr?.response?.data?.message || 'Payment verification failed.')
+          } finally {
+            setLoading(false)
+          }
         },
-        prefill: { name: address.name, contact: address.phone },
-        theme: { color: '#F5F5F0' },
+        prefill: {
+          name: address.name || user?.name || '',
+          email: user?.email || '',
+          contact: address.phone || '',
+        },
+        theme: { color: '#000000' },
+        modal: {
+          ondismiss: () => {
+            setLoading(false)
+            toast('Payment cancelled', { icon: 'ℹ️' })
+          },
+        },
       }
 
       const rzp = new window.Razorpay(options)
+      rzp.on('payment.failed', (response) => {
+        setLoading(false)
+        console.error('Razorpay payment failed:', response.error)
+        toast.error(response.error?.description || 'Payment failed or declined.')
+      })
       rzp.open()
     } catch (err) {
       console.error('Payment error:', err)
       const msg = err?.response?.data?.message || err?.message || 'Payment failed. Please try again.'
       toast.error(msg)
-    } finally {
       setLoading(false)
     }
   }

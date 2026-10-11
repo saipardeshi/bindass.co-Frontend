@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 import { sectionUrl } from '../utils/cloudinaryHelpers'
@@ -11,6 +11,8 @@ export default function AuthPage() {
   const [form, setForm] = useState({ name: '', email: '', password: '' })
   const { login, register } = useAuth()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const redirect = searchParams.get('redirect') || '/'
 
   const handleChange = e => setForm(p => ({ ...p, [e.target.name]: e.target.value }))
 
@@ -25,7 +27,7 @@ export default function AuthPage() {
         await register(form.name, form.email, form.password)
         toast.success('Account created!')
       }
-      navigate('/')
+      navigate(redirect)
     } catch (err) {
       toast.error(err?.response?.data?.message || 'Something went wrong')
     } finally {

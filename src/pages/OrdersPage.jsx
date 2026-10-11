@@ -17,7 +17,14 @@ export default function OrdersPage() {
     queryFn: () => getMyOrders().then(r => r.data),
   })
 
-  const orders = data?.orders || []
+  // Extract orders from Spring Page or ApiResponse structure
+  const orders = Array.isArray(data?.data?.content)
+    ? data.data.content
+    : Array.isArray(data?.data)
+    ? data.data
+    : Array.isArray(data?.orders)
+    ? data.orders
+    : []
 
   return (
     <div className="min-h-screen bg-black pt-16">
