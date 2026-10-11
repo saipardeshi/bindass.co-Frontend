@@ -127,10 +127,11 @@ export function CartProvider({ children }) {
   }, [state.items, user])
 
   const addToCart = async (product, size) => {
+    const productId = product?._id || product?.id
     if (user) {
       try {
         const { data } = await cartApi.addCartItem({
-          productId: product._id,
+          productId,
           size,
           quantity: 1,
         })
@@ -141,7 +142,7 @@ export function CartProvider({ children }) {
       }
       return
     }
-    dispatch({ type: 'ADD_ITEM', payload: { ...product, size } })
+    dispatch({ type: 'ADD_ITEM', payload: { ...product, _id: productId, size } })
     toast.success(`${product.name} added to cart`)
   }
 

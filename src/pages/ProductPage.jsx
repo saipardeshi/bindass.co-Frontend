@@ -28,7 +28,7 @@ export default function ProductPage() {
   const { data, isLoading } = useProduct(slug)
   const { addToCart } = useCart()
 
-  const product = data?.product || DUMMY_PRODUCT
+  const product = data?.data || data?.product || DUMMY_PRODUCT
   const [selectedSize, setSelectedSize] = useState(null)
   const [activeImg, setActiveImg] = useState(0)
   const [activeTab, setActiveTab] = useState('details')
