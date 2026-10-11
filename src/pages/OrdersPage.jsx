@@ -49,7 +49,7 @@ export default function OrdersPage() {
           <div className="space-y-4">
             {orders.map((order, i) => (
               <motion.div
-                key={order._id}
+                key={order.id || order._id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.06 }}
@@ -58,7 +58,7 @@ export default function OrdersPage() {
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div>
                     <p className="font-mono text-[10px] text-gray-600 tracking-widest uppercase mb-1">
-                      Order #{order._id?.slice(-8).toUpperCase()}
+                      Order #{(order.id || order._id)?.slice(-8).toUpperCase()}
                     </p>
                     <p className="font-sans text-sm text-gray-400">
                       {new Date(order.createdAt).toLocaleDateString('en-IN', {

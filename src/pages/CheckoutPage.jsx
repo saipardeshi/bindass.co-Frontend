@@ -75,7 +75,17 @@ export default function CheckoutPage() {
         script.onerror = () => resolve(false)
         document.body.appendChild(script)
       } else {
-        script.onload = () => resolve(true)
+        // If script is already in DOM, it might already be loaded or in flight
+        if (window.Razorpay) {
+          resolve(true)
+        } else {
+          script.addEventListener('load', () => resolve(true), { once: true })
+          script.addEventListener('error', () => resolve(false), { once: true })
+          // Fallback check in case load event already passed
+          setTimeout(() => {
+            resolve(!!window.Razorpay)
+          }, 1500)
+        }
       }
     })
   }
@@ -87,26 +97,30 @@ export default function CheckoutPage() {
       return
     }
 
-    const razorpayKey = (import.meta.env.VITE_RAZORPAY_KEY_ID || '').trim()
-    if (!razorpayKey) {
-      toast.error('Razorpay key is not configured.')
-      return
-    }
-
     setLoading(true)
     try {
       // 1. Create order on backend
       const { data } = await createOrder({
-        items: items.map(i => ({ productId: i._id, size: i.size, quantity: i.quantity })),
-        shippingAddress: address,
+        items: items.map(i => ({ productId: i._id || i.id, size: i.size, quantity: i.quantity })),
+        shippingAddress: {
+          ...address,
+          pincode: address.pincode.trim(),
+        },
         totalAmount: total,
       })
 
       // 2. Open Razorpay
-      const resultData = data.data; // ApiResponse's data field
+      const resultData = data.data // ApiResponse's data field
+      const razorpayKey = (resultData?.razorpayKeyId || import.meta.env.VITE_RAZORPAY_KEY_ID || '').trim()
+      if (!razorpayKey) {
+        toast.error('Razorpay key is not configured.')
+        setLoading(false)
+        return
+      }
+
       const options = {
         key: razorpayKey,
-        amount: Math.round(resultData.order.totalAmount * 100), // convert to paise
+        amount: resultData?.order?.amount || Math.round(resultData.order.totalAmount * 100), // paise for Razorpay SDK
         currency: 'INR',
         name: 'BINDASS',
         description: 'Premium Unisex Hoodies',
@@ -222,6 +236,11 @@ export default function CheckoutPage() {
                 const missing = required.filter(k => !address[k].trim())
                 if (missing.length > 0) {
                   toast.error('Please fill in all required fields')
+                  return
+                }
+                const cleanPincode = address.pincode.trim()
+                if (!/^\d{6}$/.test(cleanPincode)) {
+                  toast.error('Please enter a valid 6-digit PIN code')
                   return
                 }
                 setStep(1)
