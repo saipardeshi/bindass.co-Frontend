@@ -42,7 +42,7 @@ function UnverifiedBanner() {
   const [resending, setResending] = useState(false)
   const [dismissed, setDismissed] = useState(false)
 
-  if (!user || user.isVerified || dismissed) return null
+  if (!user || (user.isVerified ?? user.verified) || dismissed) return null
 
   const handleResend = async () => {
     setResending(true)
