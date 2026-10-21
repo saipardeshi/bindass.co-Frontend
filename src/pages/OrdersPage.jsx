@@ -89,7 +89,7 @@ export default function OrdersPage() {
             </div>
 
             <div className="flex items-center gap-4 flex-wrap">
-              {user.isVerified ? (
+              {(user.isVerified ?? user.verified) ? (
                 <span className="font-mono text-[10px] tracking-widest uppercase px-3 py-1.5 border border-green-500/30 bg-green-500/10 text-green-400">
                   Verified Account ✓
                 </span>
