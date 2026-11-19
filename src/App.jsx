@@ -5,7 +5,6 @@ import { CartProvider } from './context/CartContext'
 import ErrorBoundary from './components/ErrorBoundary'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
-import AnnouncementBar from './components/AnnouncementBar'
 import ScrollToTop from './components/ScrollToTop'
 import { initAnalytics, trackPageView } from './utils/analytics'
 import { errorTracker } from './utils/errorTracker'
@@ -93,7 +92,6 @@ function AppRoutes() {
     <div className="min-h-screen bg-black flex flex-col">
       <ScrollToTop />
       <div className="grain-overlay" />
-      <AnnouncementBar />
       <UnverifiedBanner />
       <Navbar />
 
