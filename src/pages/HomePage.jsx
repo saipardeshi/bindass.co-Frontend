@@ -6,6 +6,7 @@ import ProductCard from '../components/ProductCard'
 import Newsletter from '../components/Newsletter'
 import { ProductCardSkeleton } from '../components/SkeletonLoader'
 import { heroUrl, sectionUrl } from '../utils/cloudinaryHelpers'
+import HeroBackground from '../components/HeroBackground'
 
 /* ─── Dummy data (remove when API is live) ─── */
 const DUMMY_PRODUCTS = Array.from({ length: 8 }, (_, i) => ({
@@ -62,24 +63,27 @@ function HeroSection() {
 
   return (
     <section ref={ref} className="relative h-screen overflow-hidden bg-gray-950">
-      {/* Parallax BG */}
-      <motion.div className="absolute inset-0" style={{ y }}>
+      {/* 3D Animated Background */}
+      <HeroBackground />
+
+      {/* Hero product image — layered over the 3D bg */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none"
+        style={{ y, zIndex: 1 }}
+      >
         <img
           src={heroUrl(SLIDES[0].image)}
           alt="Bindass hero"
           loading="eager"
           fetchpriority="high"
           decoding="async"
-          className="w-full h-full object-cover object-top opacity-60"
+          className="w-full h-full object-cover object-top opacity-40 mix-blend-luminosity"
         />
-        {/* Gradient vignette */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent" />
       </motion.div>
 
       {/* Content */}
       <motion.div
-        style={{ opacity }}
+        style={{ opacity, zIndex: 2 }}
         className="absolute inset-0 flex flex-col justify-end pb-20 md:pb-28 px-6 md:px-16 max-w-screen-xl mx-auto left-0 right-0"
       >
         <motion.p
@@ -135,6 +139,7 @@ function HeroSection() {
         animate={{ opacity: 1 }}
         transition={{ delay: 1.8 }}
         className="absolute bottom-8 right-8 flex flex-col items-center gap-3"
+        style={{ zIndex: 3 }}
       >
         <span className="section-label text-gray-600 text-[9px] rotate-90 tracking-widest3">SCROLL</span>
         <motion.div
