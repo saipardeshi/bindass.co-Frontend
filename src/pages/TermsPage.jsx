@@ -1,9 +1,10 @@
+import AnimatedHeading from '../components/AnimatedHeading'
 import { motion } from 'framer-motion'
 import Newsletter from '../components/Newsletter'
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-black pt-28 pb-12">
+    <div className="min-h-screen pt-28 pb-12">
       <div className="max-w-3xl mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -12,7 +13,7 @@ export default function TermsPage() {
           className="space-y-4 text-center mb-16"
         >
           <p className="section-label text-accent uppercase tracking-widest">LEGAL</p>
-          <h1 className="font-display text-5xl md:text-6xl tracking-wider text-white">TERMS OF USE</h1>
+          <AnimatedHeading className="font-display text-5xl md:text-6xl tracking-wider text-white">TERMS OF USE</AnimatedHeading>
           <p className="font-sans text-sm text-gray-500 max-w-md mx-auto leading-relaxed">
             Last Updated: August 2026. Rules and guidelines for browsing and shopping at BINDASS.
           </p>

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 
 export default function NotFoundPage() {
   return (
-    <div className="min-h-screen bg-black pt-24 pb-16 flex items-center justify-center px-6">
+    <div className="min-h-screen pt-24 pb-16 flex items-center justify-center px-6">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}

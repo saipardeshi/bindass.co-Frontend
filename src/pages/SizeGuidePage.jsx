@@ -1,3 +1,4 @@
+import AnimatedHeading from '../components/AnimatedHeading'
 import { motion } from 'framer-motion'
 import Newsletter from '../components/Newsletter'
 
@@ -12,7 +13,7 @@ export default function SizeGuidePage() {
   ]
 
   return (
-    <div className="min-h-screen bg-black pt-28 pb-12">
+    <div className="min-h-screen pt-28 pb-12">
       <div className="max-w-4xl mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -21,7 +22,7 @@ export default function SizeGuidePage() {
           className="space-y-4 text-center mb-16"
         >
           <p className="section-label text-accent uppercase tracking-widest">FIT GUIDE</p>
-          <h1 className="font-display text-5xl md:text-6xl tracking-wider text-white">SIZE GUIDE</h1>
+          <AnimatedHeading className="font-display text-5xl md:text-6xl tracking-wider text-white">SIZE GUIDE</AnimatedHeading>
           <p className="font-sans text-sm text-gray-500 max-w-md mx-auto leading-relaxed">
             All BINDASS hoodies are cut in a signature oversized, drop-shoulder silhouette. 
             We recommend ordering your standard size for the intended relaxed look.

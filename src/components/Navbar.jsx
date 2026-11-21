@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useCart } from '../context/CartContext'
-import { useAuth } from '../context/AuthContext'
+import { useCart } from '../hooks/useCart'
+import { useAuth } from '../hooks/useAuth'
 
 const NAV_LINKS = [
   { label: 'Shop', to: '/shop' },
@@ -47,8 +47,12 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  // Close mobile menu on route change
-  useEffect(() => setMobileOpen(false), [location])
+  // Close mobile menu on route change (adjust state while rendering — no effect needed)
+  const [prevLocation, setPrevLocation] = useState(location)
+  if (prevLocation !== location) {
+    setPrevLocation(location)
+    setMobileOpen(false)
+  }
 
   return (
     <>
@@ -64,7 +68,7 @@ export default function Navbar() {
           {/* Logo */}
           <Link to="/" className="flex items-center hover:opacity-80 transition-opacity duration-300">
   <img
-    src="bindass.co.logo.bg.png"
+    src="/bindass.co.logo.bg.png"
     alt="BINDASS"
     className="h-10 w-auto object-contain"
   />

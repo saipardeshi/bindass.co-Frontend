@@ -89,6 +89,28 @@
   }
 }
 
+@keyframes grain {
+  0%   { transform: translate(0, 0); }
+  25%  { transform: translate(-2%, 1%); }
+  50%  { transform: translate(1%, -2%); }
+  75%  { transform: translate(-1%, 2%); }
+  100% { transform: translate(0, 0); }
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.marquee-track {
+  animation: marquee 28s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track { animation: none; }
+  html { scroll-behavior: auto; }
+}
+
 @layer utilities {
   .text-gradient {
     background: linear-gradient(135deg, #F5F5F0 0%, #C8B89A 50%, #8C8C8C 100%);
@@ -107,3 +129,6 @@
     -webkit-backdrop-filter: blur(20px);
   }
 }
+/* Keep dim text readable on top of the site-wide aurora background */
+.text-gray-600 { color: #8a8a8a; }
+.text-gray-500 { color: #a3a3a3; }

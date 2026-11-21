@@ -1,6 +1,7 @@
+import AnimatedHeading from '../components/AnimatedHeading'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useCart } from '../context/CartContext'
+import { useCart } from '../hooks/useCart'
 import { formatINR } from '../utils/formatCurrency'
 import { thumbUrl } from '../utils/cloudinaryHelpers'
 
@@ -9,7 +10,7 @@ export default function CartPage() {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-black pt-16 flex flex-col items-center justify-center gap-8 px-6">
+      <div className="min-h-screen pt-16 flex flex-col items-center justify-center gap-8 px-6">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -29,12 +30,12 @@ export default function CartPage() {
   const total = cartTotal + shipping
 
   return (
-    <div className="min-h-screen bg-black pt-16">
+    <div className="min-h-screen pt-16">
       <div className="max-w-screen-xl mx-auto px-6 md:px-16 py-16">
         <div className="flex justify-between items-end mb-12">
           <div>
             <p className="section-label text-silver mb-2">Your</p>
-            <h1 className="font-display text-6xl tracking-wider uppercase text-white">CART</h1>
+            <AnimatedHeading className="font-display text-6xl tracking-wider uppercase text-white">CART</AnimatedHeading>
           </div>
           <button
             onClick={clearCart}
@@ -48,7 +49,7 @@ export default function CartPage() {
           {/* Items */}
           <div className="lg:col-span-2 space-y-0">
             <AnimatePresence>
-              {items.map((item, i) => (
+              {items.map((item) => (
                 <motion.div
                   key={`${item._id}-${item.size}`}
                   layout

@@ -1,34 +1,20 @@
+import TiltSurface from '../components/TiltSurface'
+import AnimatedHeading from '../components/AnimatedHeading'
 import { useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useProduct } from '../hooks/useProducts'
-import { useCart } from '../context/CartContext'
+import { useCart } from '../hooks/useCart'
 import { formatINR } from '../utils/formatCurrency'
 import { cardUrl, sectionUrl } from '../utils/cloudinaryHelpers'
 import { ProductCardSkeleton } from '../components/SkeletonLoader'
 import toast from 'react-hot-toast'
 
-const DUMMY_PRODUCT = {
-  _id: 'p1', name: 'Shadow Oversized Hoodie', slug: 'shadow-oversized-hoodie',
-  price: 2499, originalPrice: 3499, discount: 28,
-  description: 'Crafted from 380 GSM heavyweight French terry fabric. Dropped shoulders, extended hem, ribbed cuffs. A silhouette engineered for presence.',
-  details: ['380 GSM French Terry', '100% Ring-Spun Cotton', 'Dropped Shoulder Cut', 'Extended Hem 70cm', 'Ribbed Cuffs & Hem', 'Unisex Oversized Fit'],
-  sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
-  images: [
-    'samples/ecommerce/leather-bag-gray',
-    'samples/ecommerce/accessories-bag',
-    'samples/ecommerce/leather-bag-gray',
-  ],
-  category: 'Unisex Hoodie', isNew: true,
-  care: ['Cold machine wash', 'Do not tumble dry', 'Iron inside out', 'Do not bleach'],
-}
-
 export default function ProductPage() {
   const { slug } = useParams()
-  const { data, isLoading } = useProduct(slug)
+  const { data: product, isLoading, isError, error, refetch } = useProduct(slug)
   const { addToCart } = useCart()
 
-  const product = data?.data || data?.product || DUMMY_PRODUCT
   const [selectedSize, setSelectedSize] = useState(null)
   const [activeImg, setActiveImg] = useState(0)
   const [activeTab, setActiveTab] = useState('details')
@@ -70,8 +56,31 @@ export default function ProductPage() {
     )
   }
 
+  if (isError || !product) {
+    const notFound = error?.response?.status === 404
+    return (
+      <div className="min-h-screen pt-16 flex flex-col items-center justify-center gap-6 px-6 text-center">
+        <p className="section-label text-silver">{notFound ? '404' : 'Something went wrong'}</p>
+        <h1 className="font-display text-5xl md:text-6xl tracking-wider uppercase text-white">
+          {notFound ? 'Product not found' : "Couldn't load this product"}
+        </h1>
+        <p className="font-sans text-sm text-gray-400 max-w-md">
+          {notFound
+            ? 'This product may have been removed or the link is wrong.'
+            : 'Please check your connection and try again.'}
+        </p>
+        <div className="flex gap-4">
+          {!notFound && (
+            <button onClick={() => refetch()} className="btn-outline">Try again</button>
+          )}
+          <Link to="/shop" className="btn-primary">Back to shop</Link>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="min-h-screen bg-black pt-16">
+    <div className="min-h-screen pt-16">
       {/* Breadcrumb */}
       <div className="px-6 md:px-16 py-6 border-b border-white/5 max-w-screen-xl mx-auto">
         <p className="font-mono text-[10px] text-gray-600 tracking-widest uppercase">
@@ -88,7 +97,7 @@ export default function ProductPage() {
         <div className="flex flex-col md:flex-row gap-4">
           {/* Thumbnail strip */}
           <div className="hidden md:flex flex-col gap-3 w-20 shrink-0">
-            {product.images.map((img, i) => (
+            {(product.images ?? []).map((img, i) => (
               <button
                 key={i}
                 onClick={() => setActiveImg(i)}
@@ -103,7 +112,7 @@ export default function ProductPage() {
 
           {/* Main image wrapper */}
           <div className="flex-1">
-            <div className="relative aspect-[3/4] overflow-hidden bg-gray-900">
+            <TiltSurface max={6} className="relative aspect-[3/4] overflow-hidden bg-gray-900 shadow-[0_30px_80px_-30px_rgba(124,58,237,0.5)]">
               <AnimatePresence mode="wait">
                 <motion.img
                   key={activeImg}
@@ -130,11 +139,11 @@ export default function ProductPage() {
                   </span>
                 )}
               </div>
-            </div>
+            </TiltSurface>
 
             {/* Horizontal thumbnails for mobile */}
             <div className="flex md:hidden gap-2 mt-3 overflow-x-auto pb-1 scrollbar-none">
-              {product.images.map((img, i) => (
+              {(product.images ?? []).map((img, i) => (
                 <button
                   key={i}
                   onClick={() => setActiveImg(i)}
@@ -157,9 +166,7 @@ export default function ProductPage() {
           className="flex flex-col"
         >
           <p className="section-label text-silver mb-3">{product.category}</p>
-          <h1 className="font-display text-4xl md:text-5xl lg:text-6xl tracking-wider uppercase text-white leading-tight mb-6">
-            {product.name}
-          </h1>
+          <AnimatedHeading className="font-display text-4xl md:text-5xl lg:text-6xl tracking-wider uppercase text-white leading-tight mb-6">{product.name}</AnimatedHeading>
 
           {/* Price */}
           <div className="flex items-center gap-4 mb-8">
@@ -167,7 +174,7 @@ export default function ProductPage() {
             {product.originalPrice && (
               <span className="font-mono text-lg text-gray-600 line-through">{formatINR(product.originalPrice)}</span>
             )}
-            {product.discount > 0 && (
+            {product.discount > 0 && product.originalPrice > product.price && (
               <span className="bg-gray-800 text-accent font-mono text-xs tracking-widest uppercase px-3 py-1">
                 Save {formatINR(product.originalPrice - product.price)}
               </span>
@@ -192,12 +199,18 @@ export default function ProductPage() {
               </button>
             </div>
             <div className="flex flex-wrap gap-2">
-              {product.sizes.map(s => (
+              {(product.sizes ?? []).map(s => {
+                const outOfStock = (product.stock?.[s] ?? 0) <= 0
+                return (
                 <button
                   key={s}
+                  disabled={outOfStock}
+                  title={outOfStock ? 'Out of stock' : undefined}
                   onClick={() => { setSelectedSize(s); setSizeError(false) }}
                   className={`min-w-[44px] h-11 px-3 font-mono text-xs border transition-all duration-200 ${
-                    selectedSize === s
+                    outOfStock
+                      ? 'border-white/5 text-gray-700 line-through cursor-not-allowed'
+                      : selectedSize === s
                       ? 'bg-white text-black border-white'
                       : sizeError
                       ? 'border-red-900/50 text-gray-500 hover:border-white/20 hover:text-gray-300'
@@ -206,7 +219,8 @@ export default function ProductPage() {
                 >
                   {s}
                 </button>
-              ))}
+                )
+              })}
             </div>
             {sizeError && (
               <p className="font-mono text-[10px] text-red-500 tracking-wider mt-2 uppercase">
@@ -220,13 +234,15 @@ export default function ProductPage() {
             <motion.button
               whileTap={{ scale: 0.98 }}
               onClick={handleAddToCart}
-              className="btn-primary w-full text-center text-sm py-4"
+              disabled={product.isSoldOut}
+              className="btn-primary w-full text-center text-sm py-4 disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              Add to Cart
+              {product.isSoldOut ? 'Sold Out' : 'Add to Cart'}
             </motion.button>
             <button
               onClick={handleBuyNow}
-              className="btn-outline w-full text-center text-sm py-4"
+              disabled={product.isSoldOut}
+              className="btn-outline w-full text-center text-sm py-4 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               Buy Now
             </button>
@@ -260,7 +276,7 @@ export default function ProductPage() {
               >
                 {activeTab === 'details' && (
                   <ul className="space-y-2">
-                    {product.details.map((d, i) => (
+                    {(product.details ?? []).map((d, i) => (
                       <li key={i} className="flex items-center gap-3 font-sans text-sm text-gray-400">
                         <span className="w-1 h-1 bg-accent rounded-full shrink-0" />
                         {d}
@@ -270,7 +286,7 @@ export default function ProductPage() {
                 )}
                 {activeTab === 'care' && (
                   <ul className="space-y-2">
-                    {product.care.map((c, i) => (
+                    {(product.care ?? []).map((c, i) => (
                       <li key={i} className="flex items-center gap-3 font-sans text-sm text-gray-400">
                         <span className="w-1 h-1 bg-silver rounded-full shrink-0" />
                         {c}

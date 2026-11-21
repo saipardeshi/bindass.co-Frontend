@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { useCart } from '../context/CartContext'
+import { useCart } from '../hooks/useCart'
 import { formatINR } from '../utils/formatCurrency'
+import TiltSurface from "./TiltSurface"
 import { cardUrl } from '../utils/cloudinaryHelpers'
 
 export default function ProductCard({ product, index = 0 }) {
   const [hovered, setHovered] = useState(false)
-  const [imgIndex, setImgIndex] = useState(0)
   const { addToCart } = useCart()
 
   const primaryImg = product.images?.[0] || 'placeholder'
@@ -33,7 +33,7 @@ export default function ProductCard({ product, index = 0 }) {
         onMouseLeave={() => setHovered(false)}
       >
         {/* Image container */}
-        <div className="relative aspect-[3/4] overflow-hidden bg-gray-900">
+        <TiltSurface max={9} className="relative aspect-[3/4] overflow-hidden bg-gray-900 shadow-[0_20px_60px_-25px_rgba(124,58,237,0.45)]">
           {/* Primary image */}
           <img
             src={cardUrl(primaryImg)}
@@ -86,7 +86,7 @@ export default function ProductCard({ product, index = 0 }) {
               Quick Add — {product.sizes?.[0] || 'M'}
             </motion.button>
           )}
-        </div>
+        </TiltSurface>
 
         {/* Info */}
         <div className="mt-4 flex justify-between items-start">

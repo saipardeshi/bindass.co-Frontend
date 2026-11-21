@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../hooks/useAuth'
 import { forgotPassword } from '../api/auth'
 import { sectionUrl } from '../utils/cloudinaryHelpers'
 import OnboardingModal from '../components/OnboardingModal'
@@ -96,7 +96,7 @@ export default function AuthPage() {
 
   return (
     <>
-      <div className="min-h-screen bg-black pt-16 grid md:grid-cols-2">
+      <div className="min-h-screen pt-16 grid md:grid-cols-2">
         {/* Left — decorative branding */}
         <div className="hidden md:block relative overflow-hidden bg-gray-950">
           <img

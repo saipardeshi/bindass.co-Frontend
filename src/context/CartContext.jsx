@@ -1,9 +1,8 @@
-import { createContext, useContext, useReducer, useEffect, useRef, useCallback } from 'react'
+import { useReducer, useEffect, useRef, useCallback } from 'react'
 import toast from 'react-hot-toast'
-import { useAuth } from './AuthContext'
+import { useAuth } from '../hooks/useAuth'
+import { CartContext } from './contexts'
 import * as cartApi from '../api/cart'
-
-const CartContext = createContext(null)
 
 const cartReducer = (state, action) => {
   switch (action.type) {
@@ -108,8 +107,12 @@ export function CartProvider({ children }) {
       }))
       cartApi.mergeGuestCart({ items: guestItems })
         .then(({ data }) => {
-          dispatch({ type: 'LOAD_CART', payload: fromServerCart(data.data) })
+          const merged = fromServerCart(data.data)
+          dispatch({ type: 'LOAD_CART', payload: merged })
           localStorage.removeItem('bindass_cart')
+          if (guestItems.length > 0 && merged.length === 0) {
+            toast("Some items in your bag are no longer available and weren't carried over", { icon: 'ℹ️' })
+          }
         })
         .catch(() => loadServerCart())
     } else if (justLoggedOut) {
@@ -205,4 +208,3 @@ export function CartProvider({ children }) {
   )
 }
 
-export const useCart = () => useContext(CartContext)

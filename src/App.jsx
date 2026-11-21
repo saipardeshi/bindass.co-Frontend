@@ -1,10 +1,14 @@
 import { useEffect, useState } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
-import { AuthProvider, useAuth } from './context/AuthContext'
+import { AnimatePresence, motion } from 'framer-motion'
+import { SiteBackground, ScrollProgress, CursorGlow } from './components/SiteEffects'
+import { AuthProvider } from './context/AuthContext'
+import { useAuth } from './hooks/useAuth'
 import { CartProvider } from './context/CartContext'
 import ErrorBoundary from './components/ErrorBoundary'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
+import Marquee from './components/Marquee'
 import ScrollToTop from './components/ScrollToTop'
 import { initAnalytics, trackPageView } from './utils/analytics'
 import { errorTracker } from './utils/errorTracker'
@@ -89,14 +93,25 @@ function AppRoutes() {
   }, [location.pathname])
 
   return (
-    <div className="min-h-screen bg-black flex flex-col">
+    <div className="min-h-screen flex flex-col">
       <ScrollToTop />
+      <SiteBackground />
+      <ScrollProgress />
+      <CursorGlow />
       <div className="grain-overlay" />
       <UnverifiedBanner />
       <Navbar />
 
       <main className="flex-grow">
-        <Routes>
+        <AnimatePresence mode="wait" initial={false}>
+        <motion.div
+          key={location.pathname}
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -12 }}
+          transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+        >
+        <Routes location={location}>
           <Route path="/" element={<HomePage />} />
           <Route path="/shop" element={<ShopPage />} />
           <Route path="/product/:slug" element={<ProductPage />} />
@@ -123,8 +138,11 @@ function AppRoutes() {
           {/* Custom 404 Route */}
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
+        </motion.div>
+        </AnimatePresence>
       </main>
 
+      <Marquee />
       <Footer />
     </div>
   )

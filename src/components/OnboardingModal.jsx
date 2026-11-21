@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
@@ -15,25 +15,25 @@ export default function OnboardingModal({ isOpen, onClose }) {
   const [copied, setCopied] = useState(false)
   const navigate = useNavigate()
 
+  const handleComplete = useCallback(() => {
+    localStorage.setItem('bindass_onboarded', 'true')
+    localStorage.setItem('bindass_preferred_fit', selectedFit)
+    onClose()
+  }, [selectedFit, onClose])
+
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') handleComplete()
     }
     if (isOpen) window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen])
+  }, [isOpen, handleComplete])
 
   const handleCopyCode = () => {
     navigator.clipboard.writeText('BINDASS10')
     setCopied(true)
     toast.success('Code BINDASS10 copied to clipboard!')
     setTimeout(() => setCopied(false), 2500)
-  }
-
-  const handleComplete = () => {
-    localStorage.setItem('bindass_onboarded', 'true')
-    localStorage.setItem('bindass_preferred_fit', selectedFit)
-    onClose()
   }
 
   const handleStartShopping = () => {

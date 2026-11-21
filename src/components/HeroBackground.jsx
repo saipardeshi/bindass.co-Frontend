@@ -1,297 +1,157 @@
-import { useEffect, useRef } from 'react'
-import { motion, useMotionValue, useSpring } from 'framer-motion'
+import { useEffect } from 'react'
+import { motion, useMotionValue, useSpring, useReducedMotion } from 'framer-motion'
 
-/* ── Deterministic pseudo-random from seed ── */
-const seeded = (seed) => {
-  let s = seed
-  return () => {
-    s = (s * 16807 + 0) % 2147483647
-    return (s - 1) / 2147483646
-  }
-}
+/* ──────────────────────────────────────────────
+   Aurora / Mesh-Gradient Background
+   – Large glowing blobs drift and breathe
+   – Thin mesh-line overlay for depth
+   – SVG film-grain texture layer
+   – Mouse parallax on the blob layer
+   Used by the home hero AND (with `global`) as the
+   fixed site-wide background.
+   ────────────────────────────────────────────── */
 
-/* ── Shared slow-drift framer variant ── */
-const drift = (delay = 0, duration = 12) => ({
-  initial: { opacity: 0 },
-  animate: {
-    opacity: 1,
-    transition: { duration: 1.5, delay },
-  },
-})
+const BLOBS = [
+  /* color,          size,  top,   left,  animDur, delay */
+  { color: '#7c3aed', size: '70vw', top: '-20%', left: '-20%', dur: 20, delay: 0   },  // deep violet — top-left
+  { color: '#6d28d9', size: '55vw', top: '30%',  left: '55%',  dur: 25, delay: 3   },  // indigo — right-center
+  { color: '#be185d', size: '45vw', top: '55%',  left: '-10%', dur: 18, delay: 6   },  // deep pink — bottom-left
+  { color: '#1d4ed8', size: '40vw', top: '-10%', left: '60%',  dur: 22, delay: 2   },  // blue — top-right
+  { color: '#5b21b6', size: '35vw', top: '65%',  left: '65%',  dur: 28, delay: 8   },  // violet — bottom-right
+]
 
-/* ── Floating Cube ── */
-function FloatingCube({ size, x, y, rotX, rotY, rotZ, color, delay, speed }) {
+/* Each blob drifts on a unique path using JS keyframes */
+const DRIFT_PATHS = [
+  { x: [0, 80, -40, 60, 0],  y: [0, 60, 120, 40, 0]  },
+  { x: [0, -60, 40, -80, 0], y: [0, -50, 80, -30, 0] },
+  { x: [0, 100, 20, 60, 0],  y: [0, -40, -80, 20, 0] },
+  { x: [0, -50, -100, 20, 0],y: [0, 80, 20, -60, 0]  },
+  { x: [0, 60, -30, -70, 0], y: [0, -60, 60, 20, 0]  },
+]
+
+function AuroraBlob({ color, size, top, left, dur, delay, driftX, driftY, still }) {
   return (
     <motion.div
-      className="absolute pointer-events-none"
-      style={{ left: `${x}%`, top: `${y}%`, width: size, height: size }}
-      initial={{ opacity: 0, scale: 0.5 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 1.4, delay }}
-    >
-      <motion.div
-        style={{
-          width: size,
-          height: size,
-          transformStyle: 'preserve-3d',
-          perspective: 800,
-        }}
-        animate={{
-          rotateX: [rotX, rotX + 180, rotX + 360],
-          rotateY: [rotY, rotY + 240, rotY + 360],
-          rotateZ: [rotZ, rotZ + 90, rotZ + 360],
-          y: [0, -18, 0],
-        }}
-        transition={{
-          duration: speed,
-          repeat: Infinity,
-          ease: 'linear',
-          delay,
-        }}
-      >
-        {/* Six cube faces */}
-        {[
-          { transform: `translateZ(${size / 2}px)` },
-          { transform: `translateZ(-${size / 2}px) rotateY(180deg)` },
-          { transform: `rotateY(90deg) translateZ(${size / 2}px)` },
-          { transform: `rotateY(-90deg) translateZ(${size / 2}px)` },
-          { transform: `rotateX(90deg) translateZ(${size / 2}px)` },
-          { transform: `rotateX(-90deg) translateZ(${size / 2}px)` },
-        ].map((face, i) => (
-          <div
-            key={i}
-            style={{
-              ...face,
-              position: 'absolute',
-              width: size,
-              height: size,
-              border: `1px solid ${color}`,
-              background: `${color}08`,
-              backfaceVisibility: 'visible',
-            }}
-          />
-        ))}
-      </motion.div>
-    </motion.div>
-  )
-}
-
-/* ── Spinning Ring ── */
-function SpinningRing({ cx, cy, radius, color, delay, speed, tilt }) {
-  const size = radius * 2
-  return (
-    <motion.div
-      className="absolute pointer-events-none"
+      className="absolute rounded-full pointer-events-none will-change-transform"
       style={{
-        left: `${cx}%`,
-        top: `${cy}%`,
         width: size,
         height: size,
-        transform: 'translate(-50%, -50%)',
+        top,
+        left,
+        background: `radial-gradient(circle at 40% 40%, ${color}cc 0%, ${color}66 35%, transparent 70%)`,
+        filter: 'blur(80px)',
+        mixBlendMode: 'screen',
       }}
-      initial={{ opacity: 0, scale: 0.3 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 1.6, delay }}
-    >
-      <motion.div
-        style={{
-          width: size,
-          height: size,
-          borderRadius: '50%',
-          border: `1.5px solid ${color}`,
-          transformStyle: 'preserve-3d',
-          boxShadow: `0 0 20px ${color}22, inset 0 0 20px ${color}11`,
-        }}
-        animate={{
-          rotateX: [tilt, tilt + 360],
-          rotateZ: [0, 360],
-        }}
-        transition={{
-          duration: speed,
-          repeat: Infinity,
-          ease: 'linear',
-          delay,
-        }}
-      />
-    </motion.div>
-  )
-}
-
-/* ── Glowing Orb ── */
-function GlowOrb({ cx, cy, radius, color, delay, speed }) {
-  return (
-    <motion.div
-      className="absolute pointer-events-none rounded-full"
-      style={{
-        left: `${cx}%`,
-        top: `${cy}%`,
-        width: radius * 2,
-        height: radius * 2,
-        transform: 'translate(-50%, -50%)',
-        background: `radial-gradient(circle, ${color}30 0%, ${color}08 50%, transparent 70%)`,
-        filter: `blur(${radius * 0.4}px)`,
-      }}
-      animate={{
-        scale: [1, 1.25, 1],
-        opacity: [0.4, 0.8, 0.4],
-        x: [0, 20, -15, 0],
-        y: [0, -25, 10, 0],
-      }}
+      animate={still ? undefined : { x: driftX, y: driftY }}
       transition={{
-        duration: speed,
+        duration: dur,
         repeat: Infinity,
+        repeatType: 'loop',
         ease: 'easeInOut',
         delay,
+        times: [0, 0.25, 0.5, 0.75, 1],
       }}
     />
   )
 }
 
-/* ── Particle Field ── */
-function ParticleField({ count = 60 }) {
-  const rand = seeded(42)
-  return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden">
-      {Array.from({ length: count }).map((_, i) => {
-        const x = rand() * 100
-        const y = rand() * 100
-        const size = rand() * 2.5 + 0.5
-        const dur = rand() * 8 + 6
-        const del = rand() * 6
-        const opacity = rand() * 0.5 + 0.1
-        return (
-          <motion.div
-            key={i}
-            className="absolute rounded-full bg-white"
-            style={{ left: `${x}%`, top: `${y}%`, width: size, height: size }}
-            animate={{
-              opacity: [0, opacity, 0],
-              y: [0, -(rand() * 60 + 20)],
-              x: [0, (rand() - 0.5) * 30],
-            }}
-            transition={{
-              duration: dur,
-              repeat: Infinity,
-              delay: del,
-              ease: 'easeOut',
-            }}
-          />
-        )
-      })}
-    </div>
-  )
-}
-
-/* ── Grid Lines (perspective) ── */
-function PerspectiveGrid() {
+/* ── SVG film-grain ── */
+function FilmGrain() {
   return (
     <div
       className="absolute inset-0 pointer-events-none"
-      style={{ perspective: '800px', perspectiveOrigin: '50% 60%' }}
-    >
-      <div
-        style={{
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: '55%',
-          transform: 'rotateX(72deg)',
-          transformOrigin: 'bottom center',
-          backgroundImage: `
-            linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px),
-            linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px)
-          `,
-          backgroundSize: '80px 80px',
-          maskImage: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%)',
-          WebkitMaskImage: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%)',
-        }}
-      />
-    </div>
+      style={{
+        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.06'/%3E%3C/svg%3E")`,
+        backgroundSize: '200px 200px',
+        opacity: 0.55,
+        animation: 'grain 0.4s steps(2) infinite',
+      }}
+    />
   )
 }
 
-/* ── Mouse-parallax wrapper ── */
-function MouseParallax({ children }) {
-  const ref = useRef(null)
+/* ── A subtle radial vignette in the center to make text pop ── */
+function CenterLight() {
+  return (
+    <div
+      className="absolute inset-0 pointer-events-none"
+      style={{
+        background: 'radial-gradient(ellipse 60% 60% at 50% 50%, rgba(124,58,237,0.08) 0%, transparent 70%)',
+      }}
+    />
+  )
+}
+
+/* ── Mouse-parallax wrapper — only moves the blobs layer slightly.
+      Listens on `window` because the background itself is pointer-events:none. ── */
+function MouseLayer({ children, disabled }) {
   const rawX = useMotionValue(0)
   const rawY = useMotionValue(0)
-  const x = useSpring(rawX, { stiffness: 40, damping: 20 })
-  const y = useSpring(rawY, { stiffness: 40, damping: 20 })
+  const x = useSpring(rawX, { stiffness: 20, damping: 25 })
+  const y = useSpring(rawY, { stiffness: 20, damping: 25 })
 
   useEffect(() => {
-    const el = ref.current?.parentElement
-    if (!el) return
+    if (disabled) return
     const handler = (e) => {
-      const rect = el.getBoundingClientRect()
-      const nx = (e.clientX - rect.left) / rect.width - 0.5
-      const ny = (e.clientY - rect.top) / rect.height - 0.5
-      rawX.set(nx * 24)
-      rawY.set(ny * 16)
+      rawX.set((e.clientX / window.innerWidth - 0.5) * 40)
+      rawY.set((e.clientY / window.innerHeight - 0.5) * 28)
     }
-    el.addEventListener('mousemove', handler)
-    return () => el.removeEventListener('mousemove', handler)
-  }, [rawX, rawY])
+    window.addEventListener('pointermove', handler, { passive: true })
+    return () => window.removeEventListener('pointermove', handler)
+  }, [rawX, rawY, disabled])
 
   return (
-    <motion.div ref={ref} style={{ x, y }} className="absolute inset-0">
+    <motion.div className="absolute inset-0" style={{ x, y, scale: 1.08 }}>
       {children}
     </motion.div>
   )
 }
 
-/* ── Main Export ── */
-export default function HeroBackground() {
-  const rand = seeded(99)
-
-  const cubes = [
-    { size: 40, x: 8,  y: 15, rotX: 20, rotY: 30, rotZ: 10, color: '#aa3bff', delay: 0.2, speed: 18 },
-    { size: 24, x: 85, y: 10, rotX: 50, rotY: 10, rotZ: 30, color: '#6366f1', delay: 0.6, speed: 14 },
-    { size: 32, x: 70, y: 60, rotX: 10, rotY: 60, rotZ: 20, color: '#aa3bff', delay: 1.0, speed: 20 },
-    { size: 18, x: 15, y: 65, rotX: 30, rotY: 20, rotZ: 45, color: '#8b5cf6', delay: 0.4, speed: 16 },
-    { size: 28, x: 92, y: 40, rotX: 15, rotY: 45, rotZ: 15, color: '#7c3aed', delay: 0.8, speed: 22 },
-  ]
-
-  const rings = [
-    { cx: 20, cy: 25, radius: 70, color: '#aa3bff', delay: 0.3, speed: 12, tilt: 60 },
-    { cx: 80, cy: 70, radius: 90, color: '#6366f1', delay: 0.7, speed: 18, tilt: 40 },
-    { cx: 55, cy: 15, radius: 50, color: '#8b5cf6', delay: 1.2, speed: 15, tilt: 70 },
-    { cx: 90, cy: 20, radius: 40, color: '#aa3bff', delay: 0.1, speed: 10, tilt: 30 },
-  ]
-
-  const orbs = [
-    { cx: 15, cy: 40, radius: 120, color: '#aa3bff', delay: 0,   speed: 10 },
-    { cx: 85, cy: 30, radius: 90,  color: '#6366f1', delay: 2,   speed: 13 },
-    { cx: 50, cy: 80, radius: 150, color: '#7c3aed', delay: 1,   speed: 16 },
-    { cx: 5,  cy: 80, radius: 60,  color: '#aa3bff', delay: 3,   speed: 11 },
-  ]
+/* ──────────── Main Export ──────────── */
+export default function HeroBackground({ global = false }) {
+  const reduce = useReducedMotion()
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ zIndex: 0 }}>
-      {/* Deep background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-950 via-black to-gray-900" />
+      {/* Pure black base */}
+      <div className="absolute inset-0 bg-black" />
 
-      {/* Atmospheric glow blobs */}
-      {orbs.map((o, i) => <GlowOrb key={i} {...o} />)}
+      {/* Aurora blobs — mouse-parallax */}
+      <MouseLayer disabled={reduce}>
+        {BLOBS.map((b, i) => (
+          <AuroraBlob
+            key={i}
+            {...b}
+            still={reduce}
+            driftX={DRIFT_PATHS[i].x}
+            driftY={DRIFT_PATHS[i].y}
+          />
+        ))}
+      </MouseLayer>
 
-      {/* Perspective grid floor */}
-      <PerspectiveGrid />
+      {/* Center glow to lift mid-screen */}
+      <CenterLight />
 
-      {/* Mouse-reactive layer */}
-      <MouseParallax>
-        {/* Spinning rings */}
-        {rings.map((r, i) => <SpinningRing key={i} {...r} />)}
+      {/* Film grain on top */}
+      <FilmGrain />
 
-        {/* Floating cubes */}
-        {cubes.map((c, i) => <FloatingCube key={i} {...c} />)}
-      </MouseParallax>
-
-      {/* Particle field (not mouse-parallax so it feels independent) */}
-      <ParticleField count={55} />
-
-      {/* Top vignette to keep text readable */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/10 to-black/20" />
-      <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent" />
+      {global ? (
+        /* Site-wide: dim the whole aurora a touch so body text stays readable */
+        <div className="absolute inset-0 bg-black/35" />
+      ) : (
+        <>
+          {/* Strong bottom fade so nav/footer are clean */}
+          <div
+            className="absolute inset-x-0 bottom-0 pointer-events-none"
+            style={{ height: '40%', background: 'linear-gradient(to top, #000 0%, transparent 100%)' }}
+          />
+          {/* Soft top fade */}
+          <div
+            className="absolute inset-x-0 top-0 pointer-events-none"
+            style={{ height: '20%', background: 'linear-gradient(to bottom, #000 0%, transparent 100%)' }}
+          />
+        </>
+      )}
     </div>
   )
 }

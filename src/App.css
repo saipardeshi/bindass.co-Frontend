@@ -1,3 +1,13 @@
+@keyframes grain {
+  0%   { transform: translate(0, 0); }
+  10%  { transform: translate(-5%, -5%); }
+  30%  { transform: translate(3%, -10%); }
+  50%  { transform: translate(-5%, 5%); }
+  70%  { transform: translate(7%, 3%); }
+  90%  { transform: translate(-3%, 8%); }
+  100% { transform: translate(0, 0); }
+}
+
 .counter {
   font-size: 16px;
   padding: 5px 10px;

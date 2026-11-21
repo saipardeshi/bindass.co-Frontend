@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
 
 const LINKS = {
   Shop: [
@@ -30,14 +29,14 @@ const SOCIALS = [
 
 export default function Footer() {
   return (
-    <footer className="border-t border-white/5 bg-gray-950">
+    <footer className="border-t border-white/5 bg-black/50 backdrop-blur-xl">
       {/* Main footer */}
       <div className="max-w-screen-xl mx-auto px-6 md:px-10 py-20 grid grid-cols-2 md:grid-cols-5 gap-10">
         {/* Brand column */}
         <div className="col-span-2">
           <Link to="/" className="inline-block mb-4 hover:opacity-80 transition-opacity duration-300">
   <img
-    src="bindass.co.logo.bg.png"
+    src="/bindass.co.logo.bg.png"
     alt="BINDASS"
     className="h-20 w-auto object-contain"
   />

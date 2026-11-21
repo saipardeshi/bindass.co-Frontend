@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { verifyEmail, resendVerification } from '../api/auth'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../hooks/useAuth'
 import toast from 'react-hot-toast'
 
 export default function VerifyEmailPage() {
@@ -10,17 +10,13 @@ export default function VerifyEmailPage() {
   const token = searchParams.get('token')
   const { user, fetchUser } = useAuth()
 
-  const [status, setStatus] = useState('verifying') // 'verifying' | 'success' | 'error'
-  const [errorMessage, setErrorMessage] = useState('')
+  const [status, setStatus] = useState(token ? 'verifying' : 'error') // 'verifying' | 'success' | 'error'
+  const [errorMessage, setErrorMessage] = useState(token ? '' : 'No verification token provided in URL.')
   const [resendEmail, setResendEmail] = useState(user?.email || '')
   const [resending, setResending] = useState(false)
 
   useEffect(() => {
-    if (!token) {
-      setStatus('error')
-      setErrorMessage('No verification token provided in URL.')
-      return
-    }
+    if (!token) return
 
     let isMounted = true
     verifyEmail(token)
@@ -45,7 +41,7 @@ export default function VerifyEmailPage() {
     return () => {
       isMounted = false
     }
-  }, [token])
+  }, [token, fetchUser])
 
   const handleResend = async (e) => {
     e.preventDefault()
@@ -65,7 +61,7 @@ export default function VerifyEmailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black pt-28 pb-16 flex items-center justify-center px-6">
+    <div className="min-h-screen pt-28 pb-16 flex items-center justify-center px-6">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
