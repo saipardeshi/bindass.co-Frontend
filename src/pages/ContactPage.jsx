@@ -1,3 +1,4 @@
+import AnimatedHeading from '../components/AnimatedHeading'
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { toast } from 'react-hot-toast'
@@ -18,7 +19,7 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black pt-28 pb-12">
+    <div className="min-h-screen pt-28 pb-12">
       <div className="max-w-5xl mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -27,7 +28,7 @@ export default function ContactPage() {
           className="space-y-4 text-center mb-16"
         >
           <p className="section-label text-accent uppercase tracking-widest">GET IN TOUCH</p>
-          <h1 className="font-display text-5xl md:text-6xl tracking-wider text-white">CONTACT US</h1>
+          <AnimatedHeading className="font-display text-5xl md:text-6xl tracking-wider text-white">CONTACT US</AnimatedHeading>
           <p className="font-sans text-sm text-gray-500 max-w-md mx-auto leading-relaxed">
             Have questions about sizing, delivery, or custom orders? Drop us a line.
           </p>

@@ -1,20 +1,26 @@
+import AnimatedHeading from '../components/AnimatedHeading'
 import { motion } from 'framer-motion'
-import { Link } from 'react-router-dom'
 import Newsletter from '../components/Newsletter'
 import { heroUrl } from '../utils/cloudinaryHelpers'
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-black pt-16">
+    <div className="min-h-screen pt-16">
       {/* Hero */}
-      <section className="relative h-[60vh] overflow-hidden bg-black">
+      <section className="relative h-[60vh] overflow-hidden">
         <img
           src={heroUrl('WrinkledT_Blog_-_Sustainable_Fashion_Brand_1_qwfykb')}
           alt="About BINDASS"
           className="absolute w-full object-contain"
-style={{ top: 0, left: 0, opacity: 0.85, mixBlendMode: 'lighten' }}
+          style={{
+            top: 0,
+            left: 0,
+            opacity: 0.4,
+            mixBlendMode: 'luminosity',
+            WebkitMaskImage: 'linear-gradient(to bottom, #000 55%, transparent 100%)',
+            maskImage: 'linear-gradient(to bottom, #000 55%, transparent 100%)',
+          }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black" />
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -22,9 +28,7 @@ style={{ top: 0, left: 0, opacity: 0.85, mixBlendMode: 'lighten' }}
           className="absolute inset-0 flex flex-col items-center justify-center text-center px-6"
         >
           <p className="section-label text-silver mb-6">Est. 2024</p>
-          <h1 className="font-display text-[12vw] md:text-[8vw] tracking-wider uppercase text-white leading-none">
-            OUR STORY
-          </h1>
+          <AnimatedHeading className="font-display text-[12vw] md:text-[8vw] tracking-wider uppercase text-white leading-none">OUR STORY</AnimatedHeading>
         </motion.div>
       </section>
 

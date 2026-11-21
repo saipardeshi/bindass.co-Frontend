@@ -1,10 +1,11 @@
+import AnimatedHeading from '../components/AnimatedHeading'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { getMyOrders } from '../api/orders'
 import { deleteAccount, resendVerification } from '../api/auth'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../hooks/useAuth'
 import { formatINR } from '../utils/formatCurrency'
 import toast from 'react-hot-toast'
 
@@ -72,7 +73,7 @@ export default function OrdersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black pt-16">
+    <div className="min-h-screen pt-16">
       <div className="max-w-screen-xl mx-auto px-6 md:px-16 py-16">
         
         {/* User Profile Card */}
@@ -121,7 +122,7 @@ export default function OrdersPage() {
         {/* Section Title */}
         <div className="mb-12">
           <p className="section-label text-silver mb-2">Order History</p>
-          <h1 className="font-display text-5xl md:text-6xl tracking-wider uppercase text-white">YOUR ORDERS</h1>
+          <AnimatedHeading className="font-display text-5xl md:text-6xl tracking-wider uppercase text-white">YOUR ORDERS</AnimatedHeading>
         </div>
 
         {/* Orders List */}

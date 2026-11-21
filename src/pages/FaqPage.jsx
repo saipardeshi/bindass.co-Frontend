@@ -1,3 +1,4 @@
+import AnimatedHeading from '../components/AnimatedHeading'
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Newsletter from '../components/Newsletter'
@@ -29,7 +30,7 @@ export default function FaqPage() {
   const [openIndex, setOpenIndex] = useState(null)
 
   return (
-    <div className="min-h-screen bg-black pt-28 pb-12">
+    <div className="min-h-screen pt-28 pb-12">
       <div className="max-w-3xl mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -38,7 +39,7 @@ export default function FaqPage() {
           className="space-y-4 text-center mb-16"
         >
           <p className="section-label text-accent uppercase tracking-widest">HELP & SUPPORT</p>
-          <h1 className="font-display text-5xl md:text-6xl tracking-wider text-white">FREQUENTLY ASKED QUESTIONS</h1>
+          <AnimatedHeading className="font-display text-5xl md:text-6xl tracking-wider text-white">FREQUENTLY ASKED QUESTIONS</AnimatedHeading>
           <p className="font-sans text-sm text-gray-500 max-w-md mx-auto leading-relaxed">
             Quick answers to the most common questions regarding our collections, sizing, and policies.
           </p>

@@ -9,6 +9,7 @@ const SENTRY_DSN = import.meta.env.VITE_SENTRY_DSN || ''
 class ErrorTracker {
   constructor() {
     this.initialized = false
+    this.dsn = SENTRY_DSN // set VITE_SENTRY_DSN to enable remote reporting
   }
 
   init() {

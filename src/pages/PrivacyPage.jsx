@@ -1,9 +1,10 @@
+import AnimatedHeading from '../components/AnimatedHeading'
 import { motion } from 'framer-motion'
 import Newsletter from '../components/Newsletter'
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-black pt-28 pb-12">
+    <div className="min-h-screen pt-28 pb-12">
       <div className="max-w-3xl mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -12,7 +13,7 @@ export default function PrivacyPage() {
           className="space-y-4 text-center mb-16"
         >
           <p className="section-label text-accent uppercase tracking-widest">LEGAL</p>
-          <h1 className="font-display text-5xl md:text-6xl tracking-wider text-white">PRIVACY POLICY</h1>
+          <AnimatedHeading className="font-display text-5xl md:text-6xl tracking-wider text-white">PRIVACY POLICY</AnimatedHeading>
           <p className="font-sans text-sm text-gray-500 max-w-md mx-auto leading-relaxed">
             Last Updated: August 2026. How we process and protect your personal information.
           </p>

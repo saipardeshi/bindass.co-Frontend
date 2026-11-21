@@ -1,40 +1,30 @@
-import { useRef } from 'react'
-import { Link } from 'react-router-dom'
+import { Component, lazy, Suspense, useRef, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { useFeatured, useNewArrivals, useBestSellers } from '../hooks/useProducts'
 import ProductCard from '../components/ProductCard'
 import Newsletter from '../components/Newsletter'
 import { ProductCardSkeleton } from '../components/SkeletonLoader'
 import { heroUrl, sectionUrl } from '../utils/cloudinaryHelpers'
+import { formatINR as formatCurrency } from '../utils/formatCurrency'
 
-/* ─── Dummy data (remove when API is live) ─── */
-const DUMMY_PRODUCTS = Array.from({ length: 8 }, (_, i) => ({
-  _id: `prod_${i}`,
-  name: ['Shadow Oversized Hoodie', 'Noir Drop Shoulder', 'Monogram Fleece', 'Void Series Hoodie',
-         'Los Angeles Wash', 'Tactical Pull', 'Club Series Black', 'Crest Embroidered'][i],
-  slug: `hoodie-${i}`,
-  price: [2499, 2899, 3199, 2699, 2299, 3499, 2799, 3099][i],
-  originalPrice: i % 3 === 0 ? 3499 : null,
-  discount: i % 3 === 0 ? 30 : 0,
-  isNew: i < 3,
-  isSoldOut: i === 7,
-  sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
-   images: [
-    ['04fa1b239c87c925221839f4fdd14fbe_jpc0xg', 'e2ef98fba55320fac63538b3e27132cb_al66lw'],
-    ['09c14caaec87319b9505427d1fa1ae53_snesau', 'e6db31232a2369369581001c111d53e7_pde1t1'],
-    ['0949a3757008088d45d4b7a39e861b36_hfqvgk', '8ca8a1bb3a5991499a869ac497a5da6e_z7ncww'],
-    ['7c4c4793bd2de27f8f33b1fe143e68a3_helqqb', '8851175913f2fa522a694960e20f7d23_lrog5e'],
-    ['11b74b65d3f58353f0e8a89ebef7f8e9_r5pkje', 'ea01ff5dbc6eb04ed40e64582183347d_ilsjqq'],
-    ['b68f66df131f426c9c4293de87a66968_ld9esi', '9c51d56883cc4e042a06936ea8ee09ff_ljcweu'],
-    ['feb19ee3b1dc442bfc0a4b3c56503a6c_yeh9ev', 'de27f66e82f5d7ed203c9261cef86f0f_a2pvqg'],
-    ['5cdaab5bfdf6296f55deb61811685e45_dhpehl', 'c639fafccf9d8372d15ae19c60232fac_tt5pj5'],
-  ][i],
-  category: 'Unisex Hoodie',
-}))
+// three.js is heavy — load it in its own chunk, after the page shell renders
+const HeroScene3D = lazy(() => import('../components/HeroScene3D'))
+
+// If WebGL fails, silently fall back to the static hero image
+class ErrorBoundary extends Component {
+  state = { failed: false }
+  static getDerivedStateFromError() { return { failed: true } }
+  render() { return this.state.failed ? this.props.fallback : this.props.children }
+}
 
 /* ─── Hero Section ─── */
-function HeroSection() {
+function HeroSection({ products }) {
   const ref = useRef(null)
+  const navigate = useNavigate()
+  const [activeIdx, setActiveIdx] = useState(0)
+  const ringProducts = (products ?? []).slice(0, 8)
+  const showRing = ringProducts.length >= 3 // a ring of 1–2 cards looks broken
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] })
   const y = useTransform(scrollYProgress, [0, 1], ['0%', '30%'])
   const opacity = useTransform(scrollYProgress, [0, 0.6], [1, 0])
@@ -61,26 +51,56 @@ function HeroSection() {
   ]
 
   return (
-    <section ref={ref} className="relative h-screen overflow-hidden bg-gray-950">
-      {/* Parallax BG */}
-      <motion.div className="absolute inset-0" style={{ y }}>
+    <section ref={ref} className="relative h-screen overflow-hidden">
+
+      {/* Static fallback image (shows while the 3D chunk loads / if WebGL is unavailable) */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none"
+        style={{ y, zIndex: 1 }}
+      >
         <img
           src={heroUrl(SLIDES[0].image)}
           alt="Bindass hero"
           loading="eager"
           fetchpriority="high"
           decoding="async"
-          className="w-full h-full object-cover object-top opacity-60"
+          className="w-full h-full object-cover object-top opacity-20 mix-blend-luminosity"
         />
-        {/* Gradient vignette */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent" />
       </motion.div>
+
+      {/* Draggable 3D product ring + caption — if WebGL/textures fail, BOTH disappear together */}
+      {showRing && (
+        <ErrorBoundary fallback={null}>
+          <motion.div
+            className="absolute inset-x-0 top-[4%] h-[96%]"
+            style={{ opacity, zIndex: 1, WebkitMaskImage: 'linear-gradient(to bottom, #000 62%, transparent 92%)', maskImage: 'linear-gradient(to bottom, #000 62%, transparent 92%)' }}
+          >
+            <Suspense fallback={null}>
+              <HeroScene3D
+                products={ringProducts}
+                scroll={scrollYProgress}
+                onActive={setActiveIdx}
+                onSelect={(p) => navigate(`/product/${p.slug}`)}
+              />
+            </Suspense>
+          </motion.div>
+
+          <div className="absolute right-6 md:right-16 top-24 md:top-28 text-right pointer-events-none" style={{ zIndex: 2 }}>
+            <p className="section-label text-gray-500 text-[9px]">Drag to explore</p>
+            <p className="font-display text-2xl md:text-3xl tracking-wider uppercase text-white mt-1">
+              {ringProducts[activeIdx]?.name}
+            </p>
+            <p className="font-mono text-xs text-accent mt-1">
+              {formatCurrency(ringProducts[activeIdx]?.price)}
+            </p>
+          </div>
+        </ErrorBoundary>
+      )}
 
       {/* Content */}
       <motion.div
-        style={{ opacity }}
-        className="absolute inset-0 flex flex-col justify-end pb-20 md:pb-28 px-6 md:px-16 max-w-screen-xl mx-auto left-0 right-0"
+        style={{ opacity, zIndex: 2 }}
+        className="absolute inset-0 flex flex-col justify-end pb-20 md:pb-28 px-6 md:px-16 max-w-screen-xl mx-auto left-0 right-0 pointer-events-none [&_a]:pointer-events-auto"
       >
         <motion.p
           initial={{ opacity: 0, x: -30 }}
@@ -135,6 +155,7 @@ function HeroSection() {
         animate={{ opacity: 1 }}
         transition={{ delay: 1.8 }}
         className="absolute bottom-8 right-8 flex flex-col items-center gap-3"
+        style={{ zIndex: 3 }}
       >
         <span className="section-label text-gray-600 text-[9px] rotate-90 tracking-widest3">SCROLL</span>
         <motion.div
@@ -203,6 +224,7 @@ function DisruptBanner() {
 
 /* ─── Featured Products ─── */
 function FeaturedSection({ products, loading }) {
+  if (!loading && (!products || products.length === 0)) return null
   return (
     <section className="py-20 px-6 md:px-16 max-w-screen-xl mx-auto">
       <SectionHeader
@@ -215,7 +237,7 @@ function FeaturedSection({ products, loading }) {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
         {loading
           ? Array.from({ length: 4 }).map((_, i) => <ProductCardSkeleton key={i} />)
-          : (products || DUMMY_PRODUCTS.slice(0, 4)).map((p, i) => (
+          : (products ?? []).map((p, i) => (
               <ProductCard key={p._id} product={p} index={i} />
             ))}
       </div>
@@ -227,6 +249,7 @@ function FeaturedSection({ products, loading }) {
 
 /* ─── New Arrivals ─── */
 function NewArrivalsSection({ products, loading }) {
+  if (!loading && (!products || products.length === 0)) return null
   return (
     <section className="py-20 px-6 md:px-16 max-w-screen-xl mx-auto">
       <SectionHeader
@@ -238,7 +261,7 @@ function NewArrivalsSection({ products, loading }) {
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
         {loading
           ? Array.from({ length: 4 }).map((_, i) => <ProductCardSkeleton key={i} />)
-          : (products || DUMMY_PRODUCTS.slice(0, 4)).map((p, i) => (
+          : (products ?? []).map((p, i) => (
               <ProductCard key={p._id} product={p} index={i} />
             ))}
       </div>
@@ -252,7 +275,7 @@ function MissionVisionSection() {
     <section className="py-0">
       {/* Mission */}
       <div className="grid md:grid-cols-2 min-h-[500px]">
-        <div className="relative overflow-hidden bg-gray-900">
+        <div className="relative overflow-hidden bg-black/30">
           <img
             src={sectionUrl('09c14caaec87319b9505427d1fa1ae53_snesau')}
             alt="Our Mission"
@@ -267,7 +290,7 @@ function MissionVisionSection() {
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="bg-gray-950 flex flex-col justify-center px-12 md:px-16 py-20"
+          className="bg-black/40 backdrop-blur-md flex flex-col justify-center px-12 md:px-16 py-20"
         >
           <p className="section-label text-silver mb-6">01 / Mission</p>
           <h3 className="font-display text-5xl md:text-6xl tracking-wider uppercase text-white mb-6">
@@ -288,7 +311,7 @@ function MissionVisionSection() {
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="bg-gray-900 flex flex-col justify-center px-12 md:px-16 py-20 order-2 md:order-1"
+          className="bg-black/30 backdrop-blur-md flex flex-col justify-center px-12 md:px-16 py-20 order-2 md:order-1"
         >
           <p className="section-label text-silver mb-6">02 / Vision</p>
           <h3 className="font-display text-5xl md:text-6xl tracking-wider uppercase text-white mb-6">
@@ -300,7 +323,7 @@ function MissionVisionSection() {
           </p>
           <Link to="/about#vision" className="btn-outline self-start">Learn More</Link>
         </motion.div>
-        <div className="relative overflow-hidden bg-gray-800 order-1 md:order-2">
+        <div className="relative overflow-hidden bg-black/30 order-1 md:order-2">
           <img
             src={sectionUrl('04fa1b239c87c925221839f4fdd14fbe_jpc0xg')}
             alt="Our Vision"
@@ -317,6 +340,7 @@ function MissionVisionSection() {
 
 /* ─── Best Sellers ─── */
 function BestSellersSection({ products, loading }) {
+  if (!loading && (!products || products.length === 0)) return null
   return (
     <section className="py-20 px-6 md:px-16 max-w-screen-xl mx-auto">
       <SectionHeader
@@ -328,7 +352,7 @@ function BestSellersSection({ products, loading }) {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
         {loading
           ? Array.from({ length: 4 }).map((_, i) => <ProductCardSkeleton key={i} />)
-          : (products || DUMMY_PRODUCTS.slice(4, 8)).map((p, i) => (
+          : (products ?? []).map((p, i) => (
               <ProductCard key={p._id} product={p} index={i} />
             ))}
       </div>
@@ -345,7 +369,7 @@ const REVIEWS = [
 
 function ReviewsSection() {
   return (
-    <section className="py-20 px-6 md:px-16 bg-gray-950 border-y border-white/5">
+    <section className="py-20 px-6 md:px-16 bg-black/30 backdrop-blur-md border-y border-white/5">
       <div className="max-w-screen-xl mx-auto">
         <SectionHeader label="— What They Say" title="REVIEWS" />
         <div className="grid md:grid-cols-3 gap-6">
@@ -386,7 +410,7 @@ export default function HomePage() {
 
   return (
     <>
-      <HeroSection />
+      <HeroSection products={featured?.products} />
       <DisruptBanner />
       <FeaturedSection products={featured?.products} loading={fl} />
       <NewArrivalsSection products={newArrivals?.products} loading={nl} />

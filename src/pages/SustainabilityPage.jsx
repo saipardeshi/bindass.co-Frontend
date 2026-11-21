@@ -1,9 +1,10 @@
+import AnimatedHeading from '../components/AnimatedHeading'
 import { motion } from 'framer-motion'
 import Newsletter from '../components/Newsletter'
 
 export default function SustainabilityPage() {
   return (
-    <div className="min-h-screen bg-black pt-28 pb-12">
+    <div className="min-h-screen pt-28 pb-12">
       <div className="max-w-4xl mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -12,7 +13,7 @@ export default function SustainabilityPage() {
           className="space-y-4 text-center mb-16"
         >
           <p className="section-label text-accent uppercase tracking-widest">OUR COMMITMENT</p>
-          <h1 className="font-display text-5xl md:text-6xl tracking-wider text-white">SUSTAINABILITY</h1>
+          <AnimatedHeading className="font-display text-5xl md:text-6xl tracking-wider text-white">SUSTAINABILITY</AnimatedHeading>
           <p className="font-sans text-sm text-gray-500 max-w-md mx-auto leading-relaxed">
             Streetwear shouldn't compromise the future. We build luxury basics with conscious craftsmanship.
           </p>

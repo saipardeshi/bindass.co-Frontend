@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { useCart } from '../context/CartContext'
-import { useAuth } from '../context/AuthContext'
+import { useCart } from '../hooks/useCart'
+import { useAuth } from '../hooks/useAuth'
 import { formatINR } from '../utils/formatCurrency'
 import { createOrder, verifyPayment } from '../api/orders'
 import toast from 'react-hot-toast'
@@ -49,11 +49,12 @@ export default function CheckoutPage() {
     city: '', state: '', pincode: '', country: 'India',
   })
 
-  useEffect(() => {
-    if (user?.name && !address.name) {
-      setAddress(p => ({ ...p, name: user.name }))
-    }
-  }, [user])
+  // the user object can arrive after first render — seed the name once, during render
+  const [nameSeeded, setNameSeeded] = useState(!!user?.name)
+  if (!nameSeeded && user?.name) {
+    setNameSeeded(true)
+    setAddress(p => ({ ...p, name: p.name || user.name }))
+  }
 
   const handleChange = e =>
     setAddress(p => ({ ...p, [e.target.name]: e.target.value }))
@@ -174,7 +175,7 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black pt-16">
+    <div className="min-h-screen pt-16">
       <div className="max-w-3xl mx-auto px-6 py-16">
         {/* Steps */}
         <div className="flex items-center gap-0 mb-16">
@@ -239,10 +240,17 @@ export default function CheckoutPage() {
                   return
                 }
                 const cleanPincode = address.pincode.trim()
-                if (!/^\d{6}$/.test(cleanPincode)) {
+                if (!/^[1-9]\d{5}$/.test(cleanPincode)) {
                   toast.error('Please enter a valid 6-digit PIN code')
                   return
                 }
+                // same rule as the server: 10–13 digits, optional leading +
+                const cleanPhone = address.phone.replace(/[\s-]/g, '')
+                if (!/^\+?\d{10,13}$/.test(cleanPhone)) {
+                  toast.error('Please enter a valid phone number (10–13 digits)')
+                  return
+                }
+                setAddress(p => ({ ...p, phone: cleanPhone, pincode: cleanPincode }))
                 setStep(1)
               }}
               className="btn-primary mt-8 px-12"

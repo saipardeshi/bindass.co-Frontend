@@ -24,7 +24,7 @@ export default function Newsletter() {
   }
 
   return (
-    <section className="border-t border-white/5 py-24 px-6 md:px-10 bg-gray-950">
+    <section className="border-t border-white/5 py-24 px-6 md:px-10 bg-black/40 backdrop-blur-md">
       <div className="max-w-screen-xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
