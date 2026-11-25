@@ -4,6 +4,7 @@ import { motion, useScroll, useTransform } from 'framer-motion'
 import { useFeatured, useNewArrivals, useBestSellers } from '../hooks/useProducts'
 import ProductCard from '../components/ProductCard'
 import Newsletter from '../components/Newsletter'
+import HoodieShowcase from '../components/HoodieShowcase'
 import { ProductCardSkeleton } from '../components/SkeletonLoader'
 import { heroUrl, sectionUrl } from '../utils/cloudinaryHelpers'
 import { formatINR as formatCurrency } from '../utils/formatCurrency'
@@ -62,7 +63,7 @@ function HeroSection({ products }) {
           src={heroUrl(SLIDES[0].image)}
           alt="Bindass hero"
           loading="eager"
-          fetchpriority="high"
+          fetchPriority="high"
           decoding="async"
           className="w-full h-full object-cover object-top opacity-20 mix-blend-luminosity"
         />
@@ -411,6 +412,7 @@ export default function HomePage() {
   return (
     <>
       <HeroSection products={featured?.products} />
+      <HoodieShowcase products={featured?.products} />
       <DisruptBanner />
       <FeaturedSection products={featured?.products} loading={fl} />
       <NewArrivalsSection products={newArrivals?.products} loading={nl} />
