@@ -39,7 +39,7 @@ const adaptPage = (page) => ({
 const adaptList = (list) => ({ products: (Array.isArray(list) ? list : []).map(normalizeProduct) })
 
 // don't hammer the server for a product that simply doesn't exist
-const retryUnlessNotFound = (count, err) => err?.response?.status !== 404 && count < 1
+const retryUnlessNotFound = (count, err) => err?.response?.status !== 404 && count < 3
 
 /** One page of products (all filters are applied server-side). */
 export const useProducts = (params) =>

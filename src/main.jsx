@@ -10,9 +10,8 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5,
-      // fail fast (default is 3 retries with growing delays ≈ 7s of skeletons)
-      retry: 1,
-      retryDelay: 400,
+      // ride out a backend that is still waking up (react-query waits 1 s, 2 s, 4 s between tries)
+      retry: 3,
       refetchOnWindowFocus: false,
     },
   },

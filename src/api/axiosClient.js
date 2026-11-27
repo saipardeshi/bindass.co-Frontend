@@ -2,7 +2,7 @@ import axios from 'axios'
 
 const axiosClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000',
-  timeout: 8000,
+  timeout: 30000, // a sleeping free-tier backend can take 20 s+ to answer its first request
   headers: { 'Content-Type': 'application/json' },
 })
 
